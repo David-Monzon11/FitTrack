@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ref, onValue, set, remove } from 'firebase/database';
+import { ref, onValue, set, push, remove } from 'firebase/database';
 import { db } from '../config/firebase';
 import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
@@ -74,20 +74,21 @@ const Goals = () => {
 
     try {
       if (editingGoal) {
+        // Update existing goal
         await set(ref(db, `Goals/${currentUser.uid}/${editingGoal}`), {
           ...goalData,
           createdAt: goals.find((g) => g.id === editingGoal)?.createdAt || Date.now(),
         });
       } else {
-        const newGoalRef = ref(db, `Goals/${currentUser.uid}`);
-        await set(ref(db, `Goals/${currentUser.uid}/${Date.now()}`), goalData);
+        // Create new goal using push() for better Firebase compatibility
+        await push(ref(db, `Goals/${currentUser.uid}`), goalData);
       }
       setIsModalOpen(false);
       setFormData({ name: '', type: 'weight', target: '', unit: 'kg' });
       setEditingGoal(null);
     } catch (error) {
       console.error('Error saving goal:', error);
-      alert('Error saving goal: ' + error.message);
+      alert('Error saving goal: ' + error.message + '. Please make sure you have permission to write to the database.');
     }
   };
 

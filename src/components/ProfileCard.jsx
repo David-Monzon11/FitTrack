@@ -6,7 +6,7 @@ import { db } from '../config/firebase';
 import Modal from './Modal';
 
 const ProfileCard = ({ healthData, bmi, onUpdate }) => {
-  const { currentUser, userInfo, setUserInfo } = useAuth();
+  const { currentUser, userInfo, setUserInfo, logout } = useAuth();
   const navigate = useNavigate();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -113,6 +113,21 @@ const ProfileCard = ({ healthData, bmi, onUpdate }) => {
                 className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-semibold py-2 px-4 rounded-lg transition-all backdrop-blur-sm"
               >
                 <i className="fas fa-plus-circle mr-2"></i>Add Data
+              </button>
+              <button
+                onClick={async () => {
+                  if (window.confirm('Are you sure you want to log out?')) {
+                    try {
+                      await logout();
+                      navigate('/login');
+                    } catch (error) {
+                      console.error('Logout error:', error);
+                    }
+                  }
+                }}
+                className="bg-red-500 bg-opacity-80 hover:bg-opacity-100 text-white font-semibold py-2 px-4 rounded-lg transition-all backdrop-blur-sm"
+              >
+                <i className="fas fa-sign-out-alt mr-2"></i>Logout
               </button>
             </div>
           </div>
