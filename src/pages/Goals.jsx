@@ -62,12 +62,26 @@ const Goals = () => {
   }, [currentUser]);
 
   const handleSaveGoal = async () => {
-    if (!formData.name || !formData.target) return;
+    if (!currentUser) {
+      alert('You must be logged in to create goals.');
+      return;
+    }
+
+    if (!formData.name || !formData.target) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    const targetValue = parseFloat(formData.target);
+    if (isNaN(targetValue) || targetValue <= 0) {
+      alert('Please enter a valid target value.');
+      return;
+    }
 
     const goalData = {
-      name: formData.name,
+      name: formData.name.trim(),
       type: formData.type,
-      target: parseFloat(formData.target),
+      target: targetValue,
       unit: formData.unit,
       createdAt: Date.now(),
     };
@@ -88,7 +102,13 @@ const Goals = () => {
       setEditingGoal(null);
     } catch (error) {
       console.error('Error saving goal:', error);
-      alert('Error saving goal: ' + error.message + '. Please make sure you have permission to write to the database.');
+      let errorMessage = 'Error saving goal: ' + error.message;
+      
+      if (error.code === 'PERMISSION_DENIED') {
+        errorMessage += '\n\nPlease check your Firebase database rules. See FIREBASE_RULES.md for instructions.';
+      }
+      
+      alert(errorMessage);
     }
   };
 
@@ -104,13 +124,24 @@ const Goals = () => {
   };
 
   const handleDeleteGoal = async (goalId) => {
+    if (!currentUser) {
+      alert('You must be logged in to delete goals.');
+      return;
+    }
+
     if (!window.confirm('Are you sure you want to delete this goal?')) return;
 
     try {
       await remove(ref(db, `Goals/${currentUser.uid}/${goalId}`));
     } catch (error) {
       console.error('Error deleting goal:', error);
-      alert('Error deleting goal: ' + error.message);
+      let errorMessage = 'Error deleting goal: ' + error.message;
+      
+      if (error.code === 'PERMISSION_DENIED') {
+        errorMessage += '\n\nPlease check your Firebase database rules. See FIREBASE_RULES.md for instructions.';
+      }
+      
+      alert(errorMessage);
     }
   };
 

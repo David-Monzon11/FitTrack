@@ -114,7 +114,15 @@ const StepTracker = () => {
   };
 
   const saveSessionToFirebase = async () => {
-    if (!currentUser || stepCount === 0) return;
+    if (!currentUser) {
+      console.warn('User not authenticated, cannot save session.');
+      return;
+    }
+
+    if (stepCount === 0) {
+      console.warn('No steps to save.');
+      return;
+    }
 
     try {
       const today = new Date();
@@ -141,6 +149,9 @@ const StepTracker = () => {
       await push(ref(db, `StepSessions/${currentUser.uid}`), sessionData);
     } catch (error) {
       console.error('Error saving session:', error);
+      if (error.code === 'PERMISSION_DENIED') {
+        console.error('Permission denied. Please check Firebase database rules.');
+      }
     }
   };
 

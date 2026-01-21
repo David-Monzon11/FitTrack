@@ -53,7 +53,15 @@ const HealthDataInput = () => {
   }, [currentUser]);
 
   const saveData = async (dataType, value) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      alert('You must be logged in to save data.');
+      return;
+    }
+
+    if (value === null || value === undefined || isNaN(value) || value <= 0) {
+      alert('Please enter a valid value.');
+      return;
+    }
 
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
@@ -65,12 +73,26 @@ const HealthDataInput = () => {
       });
     } catch (error) {
       console.error('Error saving data:', error);
-      alert('Error saving data: ' + error.message);
+      let errorMessage = 'Error saving data: ' + error.message;
+      
+      if (error.code === 'PERMISSION_DENIED') {
+        errorMessage += '\n\nPlease check your Firebase database rules. See FIREBASE_RULES.md for instructions.';
+      }
+      
+      alert(errorMessage);
     }
   };
 
   const saveExercise = async (exerciseData) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      alert('You must be logged in to save exercise data.');
+      return;
+    }
+
+    if (!exerciseData.type || !exerciseData.date || !exerciseData.time) {
+      alert('Please fill in all exercise fields.');
+      return;
+    }
 
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
@@ -81,7 +103,13 @@ const HealthDataInput = () => {
       setModals({ ...modals, exercise: false });
     } catch (error) {
       console.error('Error saving exercise:', error);
-      alert('Error saving exercise: ' + error.message);
+      let errorMessage = 'Error saving exercise: ' + error.message;
+      
+      if (error.code === 'PERMISSION_DENIED') {
+        errorMessage += '\n\nPlease check your Firebase database rules. See FIREBASE_RULES.md for instructions.';
+      }
+      
+      alert(errorMessage);
     }
   };
 
