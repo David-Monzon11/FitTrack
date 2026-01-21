@@ -95,9 +95,9 @@ const Login = () => {
               className="w-24 h-24 mx-auto mb-4"
             />
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Fit<span className="text-primary-500">Track</span>
+              Vital<span className="text-primary-500">Track</span>
             </h1>
-            <p className="text-gray-600">Welcome back! Sign in to continue your fitness journey.</p>
+            <p className="text-gray-600">Welcome back! Sign in to continue your health journey.</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 mb-6">

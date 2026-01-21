@@ -1,22 +1,40 @@
-# FitTrack - Modern Fitness Tracking Application
+# VitalTrack - Complete Health & Fitness Platform
 
-A modern, responsive fitness tracking web application built with React.js and Tailwind CSS. Track your weight, sleep, water intake, calories, exercise, and more with an intuitive and beautiful user interface.
+A modern, comprehensive health and fitness tracking web application built with React.js and Tailwind CSS. VitalTrack helps you monitor your health metrics, set goals, track progress, and gain valuable insights into your wellness journey.
 
-## Features
+## ✨ Features
 
-- 🔐 **User Authentication**: Secure login and registration with Firebase Authentication (Email/Password and Google Sign-In)
-- 📊 **Health Metrics Tracking**: 
-  - Weight tracking with daily comparisons
-  - Sleep duration monitoring
-  - Water intake logging
-  - Calorie intake and burned calories
-  - Height tracking
-  - Exercise scheduling and completion
-  - Automatic BMI calculation
-- 📱 **Fully Responsive**: Mobile-first design that works beautifully on all devices
-- 🗺️ **Step Tracker**: GPS-based step tracking with real-time map visualization
-- 📈 **History Log**: View your complete health data history in an organized table
-- 🎨 **Modern UI/UX**: Clean, accessible, and user-friendly interface with Tailwind CSS
+### 🔐 Authentication & Security
+- Secure login and registration with Firebase Authentication
+- Email/Password and Google Sign-In support
+- Protected routes and session management
+
+### 📊 Comprehensive Health Tracking
+- **Weight tracking** with daily comparisons and trends
+- **Sleep duration** monitoring and analysis
+- **Water intake** logging and reminders
+- **Calorie intake** and burned calories tracking
+- **Height tracking** with automatic BMI calculation
+- **Exercise scheduling** and completion tracking
+- **Step counting** with GPS-based tracking and map visualization
+
+### 📈 Advanced Analytics & Insights
+- **Visual Progress Charts**: Interactive line and bar charts showing trends over time
+- **Weekly Insights Dashboard**: Track averages and changes across all metrics
+- **Health Trends**: See your progress with week-over-week comparisons
+- **Data Visualization**: Beautiful charts powered by Recharts
+
+### 🎯 Goal Setting & Tracking
+- **Personalized Goals**: Set custom goals for weight, calories, steps, water, sleep, and exercise
+- **Progress Tracking**: Real-time progress bars and percentage completion
+- **Goal Management**: Create, edit, and delete goals with ease
+- **Achievement System**: Celebrate milestones and accomplishments
+
+### 📱 User Experience
+- **Fully Responsive**: Mobile-first design optimized for all devices
+- **Modern UI/UX**: Clean, accessible interface with Tailwind CSS
+- **Dark Mode Ready**: Prepared for future dark mode implementation
+- **Intuitive Navigation**: Easy-to-use sidebar (desktop) and bottom nav (mobile)
 
 ## Tech Stack
 
@@ -25,8 +43,9 @@ A modern, responsive fitness tracking web application built with React.js and Ta
 - **Tailwind CSS** - Utility-first CSS framework
 - **Firebase** - Authentication and Realtime Database
 - **Vite** - Fast build tool and development server
+- **Recharts** - Beautiful, responsive charts and data visualization
 - **Leaflet** - Interactive maps for step tracking
-- **Font Awesome** - Icon library
+- **Font Awesome** - Comprehensive icon library
 
 ## Getting Started
 
@@ -40,7 +59,7 @@ A modern, responsive fitness tracking web application built with React.js and Ta
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd FitTrack
+cd VitalTrack
 ```
 
 2. Install dependencies:
@@ -114,6 +133,18 @@ The optimized production build will be in the `dist` directory.
 - Distance calculation
 - Interactive map visualization
 - Movement filtering to prevent false step counts
+
+### Goal Management
+- Set personalized goals for any health metric
+- Track progress with visual progress bars
+- Get notifications when goals are achieved
+- Flexible goal types and units
+
+### Insights & Analytics
+- Weekly and monthly trend analysis
+- Average calculations across all metrics
+- Percentage change indicators
+- Interactive charts for better understanding
 
 ### Responsive Design
 - Mobile-first approach

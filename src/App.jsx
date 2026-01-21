@@ -6,6 +6,8 @@ import Register from './pages/Register';
 import Today from './pages/Today';
 import HealthDataInput from './pages/HealthDataInput';
 import History from './pages/History';
+import Insights from './pages/Insights';
+import Goals from './pages/Goals';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const AppRoutes = () => {
@@ -42,6 +44,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <History />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/insights"
+        element={
+          <ProtectedRoute>
+            <Insights />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/goals"
+        element={
+          <ProtectedRoute>
+            <Goals />
           </ProtectedRoute>
         }
       />

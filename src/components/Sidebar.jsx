@@ -9,30 +9,56 @@ const Sidebar = () => {
       <div className="p-4">
         <img
           src="https://img.icons8.com/ios/100/FFFFFF/heart-with-pulse.png"
-          alt="FitTrack Logo"
+          alt="VitalTrack Logo"
           className="w-14 h-14 mx-auto"
         />
       </div>
-      <nav className="flex-1 flex flex-col justify-center items-center gap-8">
+      <nav className="flex-1 flex flex-col justify-center items-center gap-6">
         <Link
           to="/today"
-          className={`text-white text-2xl p-6 rounded-2xl transition-all duration-200 ${
+          className={`text-white text-2xl p-5 rounded-2xl transition-all duration-200 ${
             location.pathname === '/today'
               ? 'bg-white bg-opacity-25'
               : 'hover:bg-white hover:bg-opacity-10'
           }`}
           aria-label="Today"
+          title="Today"
         >
           <i className="fas fa-calendar-day"></i>
         </Link>
         <Link
+          to="/insights"
+          className={`text-white text-2xl p-5 rounded-2xl transition-all duration-200 ${
+            location.pathname === '/insights'
+              ? 'bg-white bg-opacity-25'
+              : 'hover:bg-white hover:bg-opacity-10'
+          }`}
+          aria-label="Insights"
+          title="Insights"
+        >
+          <i className="fas fa-chart-line"></i>
+        </Link>
+        <Link
+          to="/goals"
+          className={`text-white text-2xl p-5 rounded-2xl transition-all duration-200 ${
+            location.pathname === '/goals'
+              ? 'bg-white bg-opacity-25'
+              : 'hover:bg-white hover:bg-opacity-10'
+          }`}
+          aria-label="Goals"
+          title="Goals"
+        >
+          <i className="fas fa-bullseye"></i>
+        </Link>
+        <Link
           to="/history"
-          className={`text-white text-2xl p-6 rounded-2xl transition-all duration-200 ${
+          className={`text-white text-2xl p-5 rounded-2xl transition-all duration-200 ${
             location.pathname === '/history'
               ? 'bg-white bg-opacity-25'
               : 'hover:bg-white hover:bg-opacity-10'
           }`}
           aria-label="History"
+          title="History"
         >
           <i className="fas fa-history"></i>
         </Link>
