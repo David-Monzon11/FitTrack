@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ref, onValue, update } from 'firebase/database';
+import { ref, onValue } from 'firebase/database';
 import { db } from '../config/firebase';
 import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
 import StepTracker from '../components/StepTracker';
+import ProfileCard from '../components/ProfileCard';
+import QuickStats from '../components/QuickStats';
 
 const Today = () => {
-  const { currentUser, userInfo, logout } = useAuth();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [healthData, setHealthData] = useState({});
   const [yesterdayData, setYesterdayData] = useState({});
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -39,7 +42,7 @@ const Today = () => {
       unsubscribeToday();
       unsubscribeYesterday();
     };
-  }, [currentUser]);
+  }, [currentUser, refreshKey]);
 
   const calculateBMI = () => {
     if (healthData.weight && healthData.height) {
@@ -57,21 +60,6 @@ const Today = () => {
     return 'Obesity';
   };
 
-  const getBMIStatusColor = (status) => {
-    switch (status) {
-      case 'Normal weight':
-        return 'bg-green-100 text-green-800';
-      case 'Underweight':
-        return 'bg-blue-100 text-blue-800';
-      case 'Overweight':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Obesity':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const formatValue = (value, unit) => {
     if (value === undefined || value === null) return '--';
     return `${value} ${unit}`;
@@ -82,167 +70,191 @@ const Today = () => {
     return `${exercise.type || 'Exercise'}: ${exercise.date || ''}, ${exercise.time || ''}`;
   };
 
-  const handleLogout = async () => {
-    if (window.confirm('Are you sure you want to log out?')) {
-      try {
-        await logout();
-        navigate('/login');
-      } catch (error) {
-        console.error('Logout error:', error);
-      }
-    }
-  };
-
-  const userName = userInfo ? `${userInfo.firstname || ''} ${userInfo.lastname || ''}`.trim() : 'User';
-  const firstName = userInfo?.firstname || 'there';
   const bmi = calculateBMI();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Sidebar />
       <BottomNav />
 
       <div className="lg:ml-36 pb-24 lg:pb-8">
-        {/* Profile Card */}
-        <div className="card mx-4 mt-4 mb-8 bg-gradient-to-br from-blue-200 via-primary-300 to-primary-400">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="flex flex-col items-center">
-              <img
-                src="https://img.icons8.com/ios-filled/100/000000/user-female-circle.png"
-                alt="Profile"
-                className="w-24 h-24 rounded-full border-4 border-white shadow-medium"
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/100?text=User';
-                }}
-              />
-              <p className="mt-2 text-white font-semibold">Your Profile</p>
-            </div>
-            <div className="flex-1 text-center md:text-left">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">{userName}</h2>
-              <p className="text-gray-700 mb-4">Welcome back, <strong>{firstName}</strong>! Let's make today count.</p>
-              <div className="flex gap-3 justify-center md:justify-start">
-                <button
-                  onClick={() => navigate('/health-input')}
-                  className="btn-primary"
-                >
-                  Edit Health Data
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-xl transition-all duration-200 shadow-md"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-            <div className="w-full md:w-auto">
+        <div className="container mx-auto px-4 py-6">
+          {/* Profile Card */}
+          <ProfileCard 
+            healthData={healthData} 
+            bmi={bmi}
+            onUpdate={() => setRefreshKey(prev => prev + 1)}
+          />
+
+          {/* Quick Stats */}
+          <QuickStats healthData={healthData} yesterdayData={yesterdayData} />
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Left Column - Step Tracker */}
+            <div className="lg:col-span-1">
               <StepTracker />
             </div>
+
+            {/* Right Column - Health Metrics */}
+            <div className="lg:col-span-2">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">Today's Metrics</h2>
+                <button
+                  onClick={() => navigate('/health-input')}
+                  className="text-sm text-primary-600 hover:text-primary-700 font-semibold"
+                >
+                  <i className="fas fa-plus-circle mr-1"></i>Add More
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Weight */}
+                <div className="card cursor-pointer hover:shadow-large transition-all group" onClick={() => navigate('/health-input')}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                        <i className="fas fa-weight text-blue-600 text-xl"></i>
+                      </div>
+                      <h5 className="text-lg font-semibold text-gray-800">Weight</h5>
+                    </div>
+                    <i className="fas fa-chevron-right text-gray-400 group-hover:text-primary-500 transition-colors"></i>
+                  </div>
+                  <h4 className="text-3xl font-bold text-gray-900 mb-1">
+                    {formatValue(healthData.weight, 'kg')}
+                  </h4>
+                  <p className="text-sm text-gray-500">Yesterday: {formatValue(yesterdayData.weight, 'kg')}</p>
+                </div>
+
+                {/* Calories */}
+                <div className="card cursor-pointer hover:shadow-large transition-all group" onClick={() => navigate('/health-input')}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                        <i className="fas fa-fire text-orange-600 text-xl"></i>
+                      </div>
+                      <h5 className="text-lg font-semibold text-gray-800">Calories</h5>
+                    </div>
+                    <i className="fas fa-chevron-right text-gray-400 group-hover:text-primary-500 transition-colors"></i>
+                  </div>
+                  <h4 className="text-3xl font-bold text-gray-900 mb-1">
+                    {formatValue(healthData.calories, 'kcal')}
+                  </h4>
+                  <p className="text-sm text-gray-500">Yesterday: {formatValue(yesterdayData.calories, 'kcal')}</p>
+                </div>
+
+                {/* Sleep */}
+                <div className="card cursor-pointer hover:shadow-large transition-all group" onClick={() => navigate('/health-input')}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                        <i className="fas fa-bed text-indigo-600 text-xl"></i>
+                      </div>
+                      <h5 className="text-lg font-semibold text-gray-800">Sleep</h5>
+                    </div>
+                    <i className="fas fa-chevron-right text-gray-400 group-hover:text-primary-500 transition-colors"></i>
+                  </div>
+                  <h4 className="text-3xl font-bold text-gray-900 mb-1">
+                    {formatValue(healthData.sleep, 'hrs')}
+                  </h4>
+                  <p className="text-sm text-gray-500">Yesterday: {formatValue(yesterdayData.sleep, 'hrs')}</p>
+                </div>
+
+                {/* Water */}
+                <div className="card cursor-pointer hover:shadow-large transition-all group" onClick={() => navigate('/health-input')}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center group-hover:bg-cyan-200 transition-colors">
+                        <i className="fas fa-tint text-cyan-600 text-xl"></i>
+                      </div>
+                      <h5 className="text-lg font-semibold text-gray-800">Water</h5>
+                    </div>
+                    <i className="fas fa-chevron-right text-gray-400 group-hover:text-primary-500 transition-colors"></i>
+                  </div>
+                  <h4 className="text-3xl font-bold text-gray-900 mb-1">
+                    {formatValue(healthData.water, 'L')}
+                  </h4>
+                  <p className="text-sm text-gray-500">Yesterday: {formatValue(yesterdayData.water, 'L')}</p>
+                </div>
+
+                {/* Burned Calories */}
+                <div className="card cursor-pointer hover:shadow-large transition-all group" onClick={() => navigate('/health-input')}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                        <i className="fas fa-fire text-red-600 text-xl"></i>
+                      </div>
+                      <h5 className="text-lg font-semibold text-gray-800">Burned</h5>
+                    </div>
+                    <i className="fas fa-chevron-right text-gray-400 group-hover:text-primary-500 transition-colors"></i>
+                  </div>
+                  <h4 className="text-3xl font-bold text-gray-900 mb-1">
+                    {formatValue(healthData.BurCal, 'kcal')}
+                  </h4>
+                  <p className="text-sm text-gray-500">Yesterday: {formatValue(yesterdayData.BurCal, 'kcal')}</p>
+                </div>
+
+                {/* BMI */}
+                <div className="card cursor-pointer hover:shadow-large transition-all group" onClick={() => navigate('/health-input')}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                        <i className="fas fa-scale-balanced text-purple-600 text-xl"></i>
+                      </div>
+                      <h5 className="text-lg font-semibold text-gray-800">BMI</h5>
+                    </div>
+                    <i className="fas fa-chevron-right text-gray-400 group-hover:text-primary-500 transition-colors"></i>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-3xl font-bold text-gray-900">{bmi.value}</h4>
+                    <span className={`px-3 py-1 rounded-lg font-semibold text-xs ${
+                      bmi.status === 'Normal weight' ? 'bg-green-100 text-green-800' :
+                      bmi.status === 'Underweight' ? 'bg-blue-100 text-blue-800' :
+                      bmi.status === 'Overweight' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {bmi.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Health Metrics Grid */}
-        <div className="px-4 mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-8">
-            Today's Health Overview
-          </h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-            {/* Weight */}
-            <div className="card cursor-pointer hover:shadow-large transition-all" onClick={() => navigate('/health-input')}>
-              <div className="flex items-center gap-3 mb-4">
-                <i className="fas fa-weight text-primary-500 text-2xl"></i>
-                <h5 className="text-lg font-semibold text-gray-800">Weight</h5>
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-1">
-                {formatValue(healthData.weight, 'kg')}
-              </h4>
-              <p className="text-sm text-gray-500">Yesterday: {formatValue(yesterdayData.weight, 'kg')}</p>
-            </div>
-
-            {/* Calories */}
-            <div className="card cursor-pointer hover:shadow-large transition-all" onClick={() => navigate('/health-input')}>
-              <div className="flex items-center gap-3 mb-4">
-                <i className="fas fa-fire text-orange-500 text-2xl"></i>
-                <h5 className="text-lg font-semibold text-gray-800">Food Calories</h5>
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-1">
-                {formatValue(healthData.calories, 'kcal')}
-              </h4>
-              <p className="text-sm text-gray-500">Yesterday: {formatValue(yesterdayData.calories, 'kcal')}</p>
-            </div>
-
-            {/* Sleep */}
-            <div className="card cursor-pointer hover:shadow-large transition-all" onClick={() => navigate('/health-input')}>
-              <div className="flex items-center gap-3 mb-4">
-                <i className="fas fa-moon text-indigo-500 text-2xl"></i>
-                <h5 className="text-lg font-semibold text-gray-800">Sleep</h5>
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-1">
-                {formatValue(healthData.sleep, 'hrs')}
-              </h4>
-              <p className="text-sm text-gray-500">Yesterday: {formatValue(yesterdayData.sleep, 'hrs')}</p>
-            </div>
-
-            {/* Water */}
-            <div className="card cursor-pointer hover:shadow-large transition-all" onClick={() => navigate('/health-input')}>
-              <div className="flex items-center gap-3 mb-4">
-                <i className="fas fa-tint text-blue-500 text-2xl"></i>
-                <h5 className="text-lg font-semibold text-gray-800">Water</h5>
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-1">
-                {formatValue(healthData.water, 'L')}
-              </h4>
-              <p className="text-sm text-gray-500">Yesterday: {formatValue(yesterdayData.water, 'L')}</p>
-            </div>
-
-            {/* Burned Calories */}
-            <div className="card cursor-pointer hover:shadow-large transition-all" onClick={() => navigate('/health-input')}>
-              <div className="flex items-center gap-3 mb-4">
-                <i className="fas fa-fire text-red-500 text-2xl"></i>
-                <h5 className="text-lg font-semibold text-gray-800">Burned Calories</h5>
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-1">
-                {formatValue(healthData.BurCal, 'kcal')}
-              </h4>
-              <p className="text-sm text-gray-500">Yesterday: {formatValue(yesterdayData.BurCal, 'kcal')}</p>
-            </div>
-
-            {/* Height */}
-            <div className="card cursor-pointer hover:shadow-large transition-all" onClick={() => navigate('/health-input')}>
-              <div className="flex items-center gap-3 mb-4">
-                <i className="fas fa-ruler-vertical text-yellow-500 text-2xl"></i>
-                <h5 className="text-lg font-semibold text-gray-800">Height</h5>
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-1">
-                {formatValue(healthData.height, 'cm')}
-              </h4>
-              <p className="text-sm text-gray-500">Yesterday: {formatValue(yesterdayData.height, 'cm')}</p>
-            </div>
-
-            {/* Exercise */}
-            <div className="card cursor-pointer hover:shadow-large transition-all" onClick={() => navigate('/health-input')}>
-              <div className="flex items-center gap-3 mb-4">
-                <i className="fas fa-running text-green-500 text-2xl"></i>
-                <h5 className="text-lg font-semibold text-gray-800">Exercise</h5>
-              </div>
-              <h5 className="text-lg font-bold text-gray-900 mb-1">
-                {formatExercise(healthData.exercise)}
-              </h5>
-            </div>
-
-            {/* BMI */}
-            <div className="card cursor-pointer hover:shadow-large transition-all" onClick={() => navigate('/health-input')}>
-              <div className="flex items-center gap-3 mb-4">
-                <i className="fas fa-scale-balanced text-purple-500 text-2xl"></i>
-                <h5 className="text-lg font-semibold text-gray-800">BMI</h5>
-              </div>
-              <div className="flex items-center justify-between">
-                <h4 className="text-2xl font-bold text-gray-900">{bmi.value}</h4>
-                <span className={`px-4 py-2 rounded-xl font-semibold text-sm ${getBMIStatusColor(bmi.status)}`}>
-                  {bmi.status}
-                </span>
-              </div>
-            </div>
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button
+              onClick={() => navigate('/insights')}
+              className="card text-center hover:shadow-large transition-all group"
+            >
+              <i className="fas fa-chart-line text-3xl text-primary-500 mb-2 group-hover:scale-110 transition-transform"></i>
+              <h4 className="font-semibold text-gray-900">View Insights</h4>
+              <p className="text-sm text-gray-500">Analytics & Trends</p>
+            </button>
+            <button
+              onClick={() => navigate('/goals')}
+              className="card text-center hover:shadow-large transition-all group"
+            >
+              <i className="fas fa-bullseye text-3xl text-green-500 mb-2 group-hover:scale-110 transition-transform"></i>
+              <h4 className="font-semibold text-gray-900">My Goals</h4>
+              <p className="text-sm text-gray-500">Track Progress</p>
+            </button>
+            <button
+              onClick={() => navigate('/history')}
+              className="card text-center hover:shadow-large transition-all group"
+            >
+              <i className="fas fa-history text-3xl text-indigo-500 mb-2 group-hover:scale-110 transition-transform"></i>
+              <h4 className="font-semibold text-gray-900">History</h4>
+              <p className="text-sm text-gray-500">Past Records</p>
+            </button>
+            <button
+              onClick={() => navigate('/health-input')}
+              className="card text-center hover:shadow-large transition-all group"
+            >
+              <i className="fas fa-plus-circle text-3xl text-orange-500 mb-2 group-hover:scale-110 transition-transform"></i>
+              <h4 className="font-semibold text-gray-900">Add Data</h4>
+              <p className="text-sm text-gray-500">Log Health Metrics</p>
+            </button>
           </div>
         </div>
       </div>
